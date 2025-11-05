@@ -85,7 +85,6 @@ async def main():
             await page.wait_for_timeout(5000)
             await page.locator('xpath=/html[1]/body[1]/div[5]/ul[1]/li[1]/span[1]/div[1]/div[1]/span[1]').click()
             await page.wait_for_timeout(10000)
-            await page.locator('/html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/span[1]/span[1]/span[1]').click()
 
             await page.goto("https://spx.shopee.com.br/#/taskCenter/exportTaskCenter")
             await page.wait_for_timeout(10000)

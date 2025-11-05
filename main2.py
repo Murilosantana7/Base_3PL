@@ -83,7 +83,7 @@ async def main():
             # Clicando no botão de exportação (assumindo que já está no filtro "Pending" por padrão)
             await page.get_by_role("button", name="Exportar").nth(0).click()
             await page.wait_for_timeout(5000)
-            await page.get_by_role("button", name="Exportar").nth(1).click()
+            await page.get_by_role("span", name="Exportar").nth(0).click()
             await page.wait_for_timeout(10000)
 
             await page.goto("https://spx.shopee.com.br/#/taskCenter/exportTaskCenter")

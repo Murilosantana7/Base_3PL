@@ -41,11 +41,11 @@ def update_packing_google_sheets(csv_file_path):
         sheet1 = client.open_by_url(
             "https://docs.google.com/spreadsheets/d/1LZ8WUrgN36Hk39f7qDrsRwvvIy1tRXLVbl3-wSQn-Pc/edit#gid=734921183"
         )
-        worksheet1 = sheet1.worksheet("Base Pending")
+        worksheet1 = sheet1.worksheet("3PL")
         df = pd.read_csv(csv_file_path).fillna("")
         worksheet1.clear()
         worksheet1.update([df.columns.values.tolist()] + df.values.tolist())
-        print(f"Arquivo enviado com sucesso para a aba 'Base Pending'.")
+        print(f"Arquivo enviado com sucesso para a aba '3PL'.")
     except Exception as e:
         print(f"Erro durante o processo: {e}")
 
@@ -64,7 +64,7 @@ async def main():
             # LOGIN
             await page.goto("https://spx.shopee.com.br/")
             await page.wait_for_selector('xpath=//*[@placeholder="Ops ID"]', timeout=10000)
-            await page.locator('xpath=//*[@placeholder="Ops ID"]').fill('Ops113074')
+            await page.locator('xpath=//*[@placeholder="Ops ID"]').fill('Ops134882')
             await page.locator('xpath=//*[@placeholder="Senha"]').fill('@Shopee123')
             await page.locator('xpath=/html/body/div[1]/div/div[2]/div/div/div[1]/div[3]/form/div/div/button').click()
             await page.wait_for_load_state("networkidle", timeout=20000)
@@ -76,8 +76,8 @@ async def main():
                 await page.keyboard.press("Escape")
 
             # ================== DOWNLOAD: PENDING ==================
-            print("\nIniciando Download: Base Pending")
-            await page.goto("https://spx.shopee.com.br/#/hubLinehaulTrips/trip")
+            print("\nIniciando Download: 3PL")
+            await page.goto("https://spx.shopee.com.br/#/general-three-pl-handover/task-list")
             await page.wait_for_timeout(12000)
 
             # Clicando no botão de exportação (assumindo que já está no filtro "Pending" por padrão)

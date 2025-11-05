@@ -78,12 +78,11 @@ async def main():
             # ================== DOWNLOAD: PENDING ==================
             print("\nIniciando Download: 3PL")
             await page.goto("https://spx.shopee.com.br/#/general-three-pl-handover/task-list")
-            await page.wait_for_timeout(12000)
+            await page.wait_for_timeout(10000)
 
-            # Clicando no botão de exportação (assumindo que já está no filtro "Pending" por padrão)
             await page.get_by_role("button", name="Exportar").nth(0).click()
-            await page.wait_for_timeout(5000)
-            await page.get_by_role("span", name="Exportar").nth(0).click()
+            await page.wait_for_timeout(10000)
+            await page.locator('/html[1]/body[1]/div[5]/ul[1]/li[1]/span[1]/div[1]/div[1]/span[1]').click()
             await page.wait_for_timeout(10000)
 
             await page.goto("https://spx.shopee.com.br/#/taskCenter/exportTaskCenter")

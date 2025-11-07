@@ -82,7 +82,7 @@ async def main():
 
             await page.get_by_role("button", name="Exportar").nth(0).click()
             await page.wait_for_timeout(10000)
-            await page.locator('/html[1]/body[1]/div[5]/ul[1]/li[1]/span[1]/div[1]/div[1]/span[1]').click()
+            await page.locator('xpath=/html[1]/body[1]/div[5]/ul[1]/li[1]/span[1]/div[1]/div[1]/span[1]').click()
             await page.wait_for_timeout(10000)
 
             await page.goto("https://spx.shopee.com.br/#/taskCenter/exportTaskCenter")

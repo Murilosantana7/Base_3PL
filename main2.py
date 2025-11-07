@@ -6,6 +6,8 @@ import shutil
 import gspread
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
+import zipfile  # NOVO: Importa a biblioteca para lidar com ZIP
+import io       # NOVO: Importa a biblioteca para lidar com E/S em memória
 
 DOWNLOAD_DIR = "/tmp"
 
@@ -15,6 +17,7 @@ DOWNLOAD_DIR = "/tmp"
 def rename_downloaded_file(download_dir, download_path):
     try:
         current_hour = datetime.now().strftime("%H")
+        # Mesmo que seja um ZIP, mantemos a sua lógica de nome
         new_file_name = f"PEND-{current_hour}.csv"
         new_file_path = os.path.join(download_dir, new_file_name)
         if os.path.exists(new_file_path):
@@ -28,13 +31,56 @@ def rename_downloaded_file(download_dir, download_path):
 
 
 # ==============================
-# Função de atualização Google Sheets
+# Função de atualização Google Sheets (MODIFICADA)
 # ==============================
-def update_packing_google_sheets(csv_file_path):
+def update_packing_google_sheets(zip_file_path): # NOVO: Nome da variável mudo para clareza
     try:
-        if not os.path.exists(csv_file_path):
-            print(f"Arquivo {csv_file_path} não encontrado.")
+        if not os.path.exists(zip_file_path):
+            print(f"Arquivo {zip_file_path} não encontrado.")
             return
+
+        df = None # NOVO: Inicializa o DataFrame como nulo
+
+        # --- INÍCIO DA LÓGICA DE DESCOMPACTAÇÃO ---
+        try:
+            # 1. Abre o arquivo ZIP
+            with zipfile.ZipFile(zip_file_path, 'r') as zf:
+                
+                # 2. Encontra o nome do arquivo .csv DENTRO do .zip
+                csv_filename_inside_zip = None
+                for file in zf.namelist():
+                    if file.endswith('.csv'):
+                        csv_filename_inside_zip = file
+                        break
+                
+                if not csv_filename_inside_zip:
+                    print(f"Erro: Nenhum arquivo .csv foi encontrado dentro do {zip_file_path}")
+                    return # Aborta se não achar o CSV
+                
+                print(f"Lendo o arquivo '{csv_filename_inside_zip}' de dentro do ZIP...")
+
+                # 3. Abre o arquivo CSV de dentro do ZIP para a memória
+                with zf.open(csv_filename_inside_zip) as f:
+                    # 4. Tenta ler o CSV (agora sim, é um CSV)
+                    try:
+                        # Tenta como UTF-8
+                        df = pd.read_csv(f).fillna("")
+                    except UnicodeDecodeError:
+                        # Se falhar, é o erro de encoding original. Tenta 'latin-1'
+                        print("Falha no UTF-8, tentando com 'latin-1'...")
+                        f.seek(0) # Volta ao início do arquivo em memória
+                        df = pd.read_csv(f, encoding='latin-1').fillna("")
+        
+        except zipfile.BadZipFile:
+            print(f"Erro: O arquivo {zip_file_path} não é um arquivo ZIP válido.")
+            return
+        # --- FIM DA LÓGICA DE DESCOMPACTAÇÃO ---
+
+        # 5. Continua com o upload para o Google Sheets
+        if df is None:
+            print("Erro: DataFrame não foi carregado, upload abortado.")
+            return
+            
         scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         creds = ServiceAccountCredentials.from_json_keyfile_name("hxh.json", scope)
         client = gspread.authorize(creds)
@@ -42,16 +88,18 @@ def update_packing_google_sheets(csv_file_path):
             "https://docs.google.com/spreadsheets/d/1LZ8WUrgN36Hk39f7qDrsRwvvIy1tRXLVbl3-wSQn-Pc/edit#gid=734921183"
         )
         worksheet1 = sheet1.worksheet("3PL")
-        df = pd.read_csv(csv_file_path).fillna("")
+        
         worksheet1.clear()
         worksheet1.update([df.columns.values.tolist()] + df.values.tolist())
         print(f"Arquivo enviado com sucesso para a aba '3PL'.")
+
     except Exception as e:
+        # A mensagem de erro original 'utf-8' não deve mais aparecer aqui
         print(f"Erro durante o processo: {e}")
 
 
 # ==============================
-# Fluxo principal Playwright
+# Fluxo principal Playwright (Sem alterações)
 # ==============================
 async def main():
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -98,6 +146,7 @@ async def main():
 
             new_file_path = rename_downloaded_file(DOWNLOAD_DIR, download_path)
             if new_file_path:
+                # Esta função agora sabe como lidar com o ZIP
                 update_packing_google_sheets(new_file_path)
 
             print("\n✅ Processo concluído com sucesso.")

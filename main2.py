@@ -82,8 +82,7 @@ async def main():
 
             await page.get_by_role("button", name="Exportar").nth(0).click()
             await page.wait_for_timeout(10000)
-            await page.locator('xpath=//div[@class='ssc-react-tooltip-reference']//span[contains(text(),'Exportar')]').click()
-            #await page.get_by_role("button", name="Exportar").nth(1).click()
+            await page.get_by_role("menuitem", name="Exportar").click()
             await page.wait_for_timeout(10000)
 
             await page.goto("https://spx.shopee.com.br/#/taskCenter/exportTaskCenter")

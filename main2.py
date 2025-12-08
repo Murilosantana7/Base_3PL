@@ -126,10 +126,10 @@ async def main():
             # ================== DOWNLOAD: PENDING ==================
             print("\nIniciando Download: 3PL")
             await page.goto("https://spx.shopee.com.br/#/general-three-pl-handover/task-list")
-            await page.wait_for_timeout(10000)
+            await page.wait_for_timeout(15000)
 
             await page.get_by_role("button", name="Exportar").nth(0).click()
-            await page.wait_for_timeout(10000)
+            await page.wait_for_timeout(15000)
             await page.get_by_role("menuitem", name="Exportar").click()
             await page.wait_for_timeout(10000)
 
